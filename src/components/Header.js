@@ -1,6 +1,8 @@
+import { connect } from "react-redux";
 import styled from "styled-components";
+import { signOutAPI } from "../actions/index";
 
-function Header() {
+function Header(props) {
   return (
     <Container>
       <Contenct>
@@ -52,13 +54,17 @@ function Header() {
 
             <User>
               <a>
-                <img src="/images/user.svg" alt="" />
+                {props.user && props.user.photoURL ? (
+                  <img src={props.user.photoURL} alt="" />
+                ) : (
+                  <img src="/images/user.svg" alt="" />
+                )}
                 <span>
                   Me
                   <img src="/images/down-icon.svg" alt="" />
                 </span>
               </a>
-              <SignOut>
+              <SignOut onClick={() => props.signOut()}>
                 <a>Sign Out</a>
               </SignOut>
             </User>
@@ -174,8 +180,10 @@ const NavListWrap = styled.ul`
 `;
 
 const NavList = styled.li`
+padding-top: 5px;
   display: flex;
   align-items: center;
+  flex: auto;
   a {
     align-items: center;
     background: transparent;
@@ -197,10 +205,9 @@ const NavList = styled.li`
     }
 
     @media (max-width: 768px) {
-      min-width: 70px;
+      min-width: 60px;
     }
   }
-
   &:hover,
   &:active {
     a {
@@ -213,8 +220,9 @@ const NavList = styled.li`
 
 const SignOut = styled.div`
   position: absolute;
-  top: 45px;
+  top: 42px;
   background: white;
+  border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 0 0 5px 5px;
   width: 100px;
   height: 40px;
@@ -222,6 +230,11 @@ const SignOut = styled.div`
   transition-duration: 167ms;
   text-align: center;
   display: none;
+  @media (max-width: 768px) {
+    top: unset;
+    bottom: 50px !important;
+    border-radius: 5px 5px 0 0;
+  }
 `;
 const User = styled(NavList)`
   a > svg {
@@ -251,4 +264,14 @@ const Work = styled(User)`
   border-left: 1px solid rgba(0, 0, 0, 0.08);
 `;
 
-export default Header;
+const mapStateToProps = (state) => {
+  return {
+    user: state.userState.user,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => ({
+  signOut: () => dispatch(signOutAPI()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Header);
