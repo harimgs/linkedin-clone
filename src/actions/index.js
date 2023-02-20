@@ -1,19 +1,22 @@
 import { async } from "@firebase/util";
 import { signInWithPopup, signOut } from "firebase/auth";
 import { auth, provider, storage } from "../firebase";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-} from "firebase/storage";
-import { SET_USER, SET_LOADING_STATUS, GET_ARTICLES } from "./actionType";
+  SET_USER,
+  SET_LOADING_STATUS,
+  GET_ARTICLES,
+  GET_LAST_ITEM,
+} from "./actionType";
 import {
   collection,
   addDoc,
   onSnapshot,
   query,
   orderBy,
+  limit,
+  getDocs,
+  startAfter,
 } from "firebase/firestore";
 import db from "../firebase";
 
@@ -27,9 +30,10 @@ export const setLoading = (status) => ({
   loading: status,
 });
 
-export const getArticles = (payload) => ({
+export const getArticles = (payload, lastItem) => ({
   type: GET_ARTICLES,
   articles: payload,
+  lastItem: lastItem,
 });
 
 export function signInAPI() {
@@ -115,16 +119,41 @@ export function postArticleAPI(payload) {
   };
 }
 
-export function getArticlesAPI() {
+export function getArticlesAPI(loadNumber = 0) {
   return (dispatch) => {
     let payload;
+    let lastItem;
+    let initNumber = 3;
+    let limitNumber = initNumber + loadNumber;
 
-    onSnapshot(
-      query(collection(db, "articles"), orderBy("actor.date", "desc")),
-      (snapshot) => {
-        payload = snapshot.docs.map((doc) => doc.data());
-        dispatch(getArticles(payload));
-      }
-    );
+    console.log(loadNumber)
+
+    if (limitNumber === 3) {
+      onSnapshot(
+        query(
+          collection(db, "articles"),
+          orderBy("actor.date", "desc"),
+          limit(initNumber)
+        ),
+        (snapshot) => {
+          payload = snapshot.docs.map((doc) => doc.data());
+          lastItem = snapshot.docs.length;
+          dispatch(getArticles(payload, lastItem));
+        }
+      );
+    } else if (limitNumber > 3) {
+      onSnapshot(
+        query(
+          collection(db, "articles"),
+          orderBy("actor.date", "desc"),
+          limit(limitNumber)
+        ),
+        (snapshot) => {
+          payload = snapshot.docs.map((doc) => doc.data());
+          lastItem = snapshot.docs.length;
+          dispatch(getArticles(payload, lastItem));
+        }
+      );
+    }
   };
 }

@@ -4,26 +4,14 @@ import PostModal from "./PostModal";
 import { useEffect, useState } from "react";
 import { getArticlesAPI } from "../actions";
 import ReactPlayer from "react-player";
-import InfiniteScroll from "react-infinite-scroll-component";
+import InfiniteScroll from 'react-infinite-scroll-component';
+
 
 function Main(props) {
   const [showModal, setShowModal] = useState("close");
-  const [hasMore, setHasMore] = useState(true);
-
   useEffect(() => {
-    props.getArticles(props.lastItem);
+    props.getArticles();
   }, []);
-
-  const getMoreArticles = () => {
-    setHasMore(false)
-    setTimeout(() => {
-      props.getArticles(props.lastItem);
-      console.log(props.article)
-      setHasMore(true);
-    }, 1500);
-  };
-
-  console.log(props.lastItem);
 
   const handleClick = (e) => {
     e.preventDefault();
@@ -44,65 +32,67 @@ function Main(props) {
   };
   return (
     <>
-      <Container>
-        <ShareBox>
-          <div>
-            {props.user && props.user.photoURL ? (
-              <img src={props.user.photoURL} alt="" />
-            ) : (
-              <img src="/images/user.svg" alt="" />
-            )}
-            <button
-              onClick={handleClick}
-              disabled={props.loading ? true : false}
-            >
-              Start a Post
-            </button>
-          </div>
-          <div>
-            <button>
-              <img src="/images/photo-icon.png" className="post-icon" alt="" />
-              <span>Photo</span>
-            </button>
+      {props.articles.length === 0 ? (
+        "No Post to Show"
+      ) : (
+        <Container>
+          <ShareBox>
+            <div>
+              {props.user && props.user.photoURL ? (
+                <img src={props.user.photoURL} alt="" />
+              ) : (
+                <img src="/images/user.svg" alt="" />
+              )}
+              <button
+                onClick={handleClick}
+                disabled={props.loading ? true : false}
+              >
+                Start a Post
+              </button>
+            </div>
+            <div>
+              <button>
+                <img
+                  src="/images/photo-icon.png"
+                  className="post-icon"
+                  alt=""
+                />
+                <span>Photo</span>
+              </button>
 
-            <button>
-              <img src="/images/video-icon.png" className="post-icon" alt="" />
-              <span>Video</span>
-            </button>
+              <button>
+                <img
+                  src="/images/video-icon.png"
+                  className="post-icon"
+                  alt=""
+                />
+                <span>Video</span>
+              </button>
 
-            <button>
-              <img src="/images/event-icon.png" className="post-icon" alt="" />
-              <span>Event</span>
-            </button>
+              <button>
+                <img
+                  src="/images/event-icon.png"
+                  className="post-icon"
+                  alt=""
+                />
+                <span>Event</span>
+              </button>
 
-            <button>
-              <img
-                src="/images/article-icon.png"
-                className="post-icon"
-                alt=""
-              />
-              <span>Write article</span>
-            </button>
-          </div>
-        </ShareBox>
-        <Content>
-          {props.loading && <img src="/images/spin-loading.gif" alt="" />}
-          <div
-            id="scrollableDiv"
-            style={{
-              height: 600,
-              overflow: "auto",
-              display: "flex",
-            }}
-          >
-            <InfiniteScroll
-              dataLength={10000000000000000} //total array size
-              next={getMoreArticles} //onLoadMore callback function
-              hasMore={hasMore}
-              loader={<h4>Loading...</h4>}
-              scrollableTarget="scrollableDiv"
-            >
-              {props.articles.map((article, i) => (
+              <button>
+                <img
+                  src="/images/article-icon.png"
+                  className="post-icon"
+                  alt=""
+                />
+                <span>Write article</span>
+              </button>
+            </div>
+          </ShareBox>
+          <Content>
+            {props.loading && <img src="/images/spin-loading.gif" alt="" />}
+
+            {props.articles.length > 0 &&
+              props.articles.map((article, i) => (
                 <Article key={i}>
                   <SharedActor>
                     <a>
@@ -170,11 +160,10 @@ function Main(props) {
                   </SocialActions>
                 </Article>
               ))}
-            </InfiniteScroll>
-          </div>
-        </Content>
-        <PostModal showModal={showModal} handleClick={handleClick} />
-      </Container>
+          </Content>
+          <PostModal showModal={showModal} handleClick={handleClick} />
+        </Container>
+      )}
     </>
   );
 }
@@ -403,12 +392,11 @@ const mapStateToProps = (state) => {
     user: state.userState.user,
     loading: state.articleState.loading,
     articles: state.articleState.articles,
-    lastItem: state.articleState.lastItem,
   };
 };
 
 const mapDispatchToProps = (dispatch) => ({
-  getArticles: (lastItem) => dispatch(getArticlesAPI(lastItem)),
+  getArticles: () => dispatch(getArticlesAPI()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Main);
