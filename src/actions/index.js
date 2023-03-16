@@ -123,7 +123,7 @@ export function getArticlesAPI(loadNumber = 0) {
   return (dispatch) => {
     let payload;
     let lastItem;
-    let initNumber = 3;
+    let initNumber = 30;
     let limitNumber = initNumber + loadNumber;
 
     console.log(loadNumber)
