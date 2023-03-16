@@ -4,26 +4,12 @@ import PostModal from "./PostModal";
 import { useEffect, useState } from "react";
 import { getArticlesAPI } from "../actions";
 import ReactPlayer from "react-player";
-import InfiniteScroll from "react-infinite-scroll-component";
 
 function Main(props) {
   const [showModal, setShowModal] = useState("close");
-  const [hasMore, setHasMore] = useState(true);
-
   useEffect(() => {
-    props.getArticles(props.lastItem);
+    props.getArticles();
   }, []);
-
-  const getMoreArticles = () => {
-    setHasMore(false)
-    setTimeout(() => {
-      props.getArticles(props.lastItem);
-      console.log(props.article)
-      setHasMore(true);
-    }, 1500);
-  };
-
-  console.log(props.lastItem);
 
   const handleClick = (e) => {
     e.preventDefault();
@@ -43,139 +29,112 @@ function Main(props) {
     }
   };
   return (
-    <>
-      <Container>
-        <ShareBox>
-          <div>
-            {props.user && props.user.photoURL ? (
-              <img src={props.user.photoURL} alt="" />
-            ) : (
-              <img src="/images/user.svg" alt="" />
-            )}
-            <button
-              onClick={handleClick}
-              disabled={props.loading ? true : false}
-            >
-              Start a Post
-            </button>
-          </div>
-          <div>
-            <button>
-              <img src="/images/photo-icon.png" className="post-icon" alt="" />
-              <span>Photo</span>
-            </button>
+    <Container>
+      <ShareBox>
+        <div>
+          {props.user && props.user.photoURL ? (
+            <img src={props.user.photoURL} alt="" />
+          ) : (
+            <img src="/images/user.svg" alt="" />
+          )}
+          <button onClick={handleClick} disabled={props.loading ? true : false}>
+            Start a Post
+          </button>
+        </div>
+        <div>
+          <button>
+            <img src="/images/photo-icon.png" className="post-icon" alt="" />
+            <span>Photo</span>
+          </button>
 
-            <button>
-              <img src="/images/video-icon.png" className="post-icon" alt="" />
-              <span>Video</span>
-            </button>
+          <button>
+            <img src="/images/video-icon.png" className="post-icon" alt="" />
+            <span>Video</span>
+          </button>
 
-            <button>
-              <img src="/images/event-icon.png" className="post-icon" alt="" />
-              <span>Event</span>
-            </button>
+          <button>
+            <img src="/images/event-icon.png" className="post-icon" alt="" />
+            <span>Event</span>
+          </button>
 
-            <button>
-              <img
-                src="/images/article-icon.png"
-                className="post-icon"
-                alt=""
-              />
-              <span>Write article</span>
-            </button>
-          </div>
-        </ShareBox>
-        <Content>
-          {props.loading && <img src="/images/spin-loading.gif" alt="" />}
-          <div
-            id="scrollableDiv"
-            style={{
-              height: 600,
-              overflow: "auto",
-              display: "flex",
-            }}
-          >
-            <InfiniteScroll
-              dataLength={10000000000000000} //total array size
-              next={getMoreArticles} //onLoadMore callback function
-              hasMore={hasMore}
-              loader={<h4>Loading...</h4>}
-              scrollableTarget="scrollableDiv"
-            >
-              {props.articles.map((article, i) => (
-                <Article key={i}>
-                  <SharedActor>
-                    <a>
-                      <img src={article.actor.image} alt="" />
-                      <div>
-                        <span>{article.actor.title}</span>
-                        {/* <span>{article.actor.description}</span> */}
-                        <span>
-                          {article.actor.date.toDate().toLocaleDateString()}
-                        </span>
-                      </div>
-                    </a>
+          <button>
+            <img src="/images/article-icon.png" className="post-icon" alt="" />
+            <span>Write article</span>
+          </button>
+        </div>
+      </ShareBox>
+      <Content>
+        {props.loading && <img src="/images/spin-loading.gif" alt="" />}
 
-                    <button>
-                      <img src="images/ellipsis.png" alt="" />
-                    </button>
-                  </SharedActor>
+        {props.articles.map((article, i) => (
+          <Article key={i}>
+            <SharedActor>
+              <a>
+                <img src={article.actor.image} alt="" />
+                <div>
+                  <span>{article.actor.title}</span>
+                  <span>{article.actor.description}</span>
+                  <span>
+                    {article.actor.date.toDate().toLocaleDateString()}
+                  </span>
+                </div>
+              </a>
 
-                  <Description>{article.description}</Description>
-                  <SharedImage>
-                    {!article.sharedImg && article.video ? (
-                      <ReactPlayer width={"100%"} url={article.video} />
-                    ) : (
-                      article.sharedImg && (
-                        <img src={article.sharedImg} alt="" />
-                      )
-                    )}
-                  </SharedImage>
-                  <SocialCounts>
-                    <li>
-                      <button>
-                        <img
-                          src="https://static-exp1.licdn.com/sc/h/d310t2g24pvdy4pt1jkedo4yb"
-                          alt=""
-                        />
-                        <img
-                          src="https://static-exp1.licdn.com/sc/h/5thsbmikm6a8uov24ygwd914f"
-                          alt=""
-                        />
-                        <span>75</span>
-                      </button>
-                    </li>
-                    <li>
-                      <a>{article.comments} comments</a>
-                    </li>
-                  </SocialCounts>
+              <button>
+                <img src="images/ellipsis.png" alt="" />
+              </button>
+            </SharedActor>
 
-                  <SocialActions>
-                    <button>
-                      <img src="/images/like-icon.svg" alt="" />
-                      <span>Like</span>
-                    </button>
-                    <button>
-                      <img src="/images/comment-icon.svg" alt="" />
-                      <span>Comment</span>
-                    </button>
-                    <button>
-                      <img src="/images/share-icon.svg" alt="" />
-                      <span>Share</span>
-                    </button>
-                    <button>
-                      <img src="/images/send-icon.svg" alt="" />
-                      <span>Send</span>
-                    </button>
-                  </SocialActions>
-                </Article>
-              ))}
-            </InfiniteScroll>
-          </div>
-        </Content>
-        <PostModal showModal={showModal} handleClick={handleClick} />
-      </Container>
-    </>
+            <Description>{article.description}</Description>
+            <SharedImage>
+              {!article.sharedImg && article.video ? (
+                <ReactPlayer width={"100%"} url={article.video} />
+              ) : (
+                article.sharedImg && <img src={article.sharedImg} alt="" />
+              )}
+            </SharedImage>
+            <SocialCounts>
+              <li>
+                <button>
+                  <img
+                    src="https://static-exp1.licdn.com/sc/h/d310t2g24pvdy4pt1jkedo4yb"
+                    alt=""
+                  />
+                  <img
+                    src="https://static-exp1.licdn.com/sc/h/5thsbmikm6a8uov24ygwd914f"
+                    alt=""
+                  />
+                  <span>75</span>
+                </button>
+              </li>
+              <li>
+                <a>{article.comments} comments</a>
+              </li>
+            </SocialCounts>
+
+            <SocialActions>
+              <button>
+                <img src="/images/like-icon.svg" alt="" />
+                <span>Like</span>
+              </button>
+              <button>
+                <img src="/images/comment-icon.svg" alt="" />
+                <span>Comment</span>
+              </button>
+              <button>
+                <img src="/images/share-icon.svg" alt="" />
+                <span>Share</span>
+              </button>
+              <button>
+                <img src="/images/send-icon.svg" alt="" />
+                <span>Send</span>
+              </button>
+            </SocialActions>
+          </Article>
+        ))}
+      </Content>
+      <PostModal showModal={showModal} handleClick={handleClick} />
+    </Container>
   );
 }
 
@@ -403,12 +362,11 @@ const mapStateToProps = (state) => {
     user: state.userState.user,
     loading: state.articleState.loading,
     articles: state.articleState.articles,
-    lastItem: state.articleState.lastItem,
   };
 };
 
 const mapDispatchToProps = (dispatch) => ({
-  getArticles: (lastItem) => dispatch(getArticlesAPI(lastItem)),
+  getArticles: () => dispatch(getArticlesAPI()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Main);
